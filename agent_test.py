@@ -19,9 +19,15 @@ class IsolationTest(unittest.TestCase):
         self.player1 = "Player1"
         self.player2 = "Player2"
         self.game = isolation.Board(self.player1, self.player2)
+        
+class AlphabetaTest(IsolationTest):
+    
+    
+    def testOne(self):
+        self.game._board_state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 20]
+        self.game.play(time_limit=150)
+#        print (a.alphabeta(self.game, 1))
 
 
 if __name__ == '__main__':
     unittest.main()
-    iso = IsolationTest.setUp
-

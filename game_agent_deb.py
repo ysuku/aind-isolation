@@ -3,6 +3,7 @@ test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
 """
 import itertools
+import json
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -286,10 +287,10 @@ class AlphaBetaPlayer(IsolationPlayer):
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-#            for i in itertools.count():
-#                best_move = self.alphabeta(game, i, float ("-inf"), float ("inf"))
-#                if self.time_left() < self.TIMER_THRESHOLD:
-#                    break
+            for i in itertools.count():
+                best_move = self.alphabeta(game, i, float ("-inf"), float ("inf"))
+                if self.time_left() < self.TIMER_THRESHOLD:
+                    break
             return self.alphabeta(game, self.search_depth, float ("-inf"), float ("inf"))
 
         except SearchTimeout:
@@ -345,65 +346,79 @@ class AlphaBetaPlayer(IsolationPlayer):
             return legalMoves[0]
         
         
-#        def alphabetaScore (game, depth, maximizingPlayer, heuristicMove, alpha=float("-inf"), beta=float("inf")):
-#            best_move = heuristicMove
-#            if self.time_left() < self.TIMER_THRESHOLD:
-#                return best_move, 0
-#            if depth < 1 or not game.get_legal_moves():
-#                s = self.score(game, self)
-#                return best_move, s;
-#                        
-#            if maximizingPlayer:
-#                for a in game.get_legal_moves():
-#                    curr_move, maxScore = alphabetaScore (game.forecast_move(a), depth - 1, False, a, alpha, beta)
-#                    if maxScore >= alpha:
-#                        alpha = maxScore
-#                        best_move = a
-##                    alpha = max (alpha, maxScore)
-#                    if alpha >= beta:
-#                        break
-#                return best_move, alpha
-#            if not maximizingPlayer:
-#                for a in game.get_legal_moves():
-#                    curr_move, minScore = alphabetaScore (game.forecast_move(a), depth - 1, True, a, alpha, beta)
-#                    if minScore <= beta:
-#                        beta = minScore
-#                        best_move = a
-##                    beta = min (beta, minScore)
-#                    if alpha >= beta:
-#                        break
-#                return best_move, beta
-#        
+        def alphabetaScore (game, depth, maximizingPlayer, alpha=float("-inf"), beta=float("inf")):
+            if self.time_left() < self.TIMER_THRESHOLD+10:
+                f = open("logfile.txt", "a")
+                f.write("\nAlphabetaScore Timour exit " + str(depth) + "Maximizing player " + str(maximizingPlayer) + "\n")
+                f.close()
+                return -1
+            if depth < 1 or not game.get_legal_moves():
+                f = open("logfile.txt", "a")
+                f.write("\nAlphabetaScore no more legal moves or depth limit reached " + str(depth) + "Maximizing player " + str(maximizingPlayer) + "\n")
+                f.close()
+                return self.score(game, self);
+                        
+            if maximizingPlayer:
+                f = open("logfile.txt", "a")
+                f.write("\nMax function nodes" + str(depth) + " : ")
+                json.dump(game.get_legal_moves(), f)
+                f.close()
+                for a in game.get_legal_moves():
+                    f = open("logfile.txt", "a")
+                    f.write("\nMax function selected node" + str(depth) + " : ")
+                    json.dump(a, f)
+                    f.close()
+                    alpha = max (alpha, alphabetaScore (game.forecast_move(a), depth - 1, False, alpha, beta))
+                    f = open("logfile.txt", "a")
+                    f.write("\nMax function alpha " + str(depth) + " : ")
+                    f.write(str(alpha))
+                    f.close()
+                    if alpha >= beta:
+                        f = open("logfile.txt", "a")
+                        f.write("\nMax function node pruned " + str(depth) + " : ")
+                        f.close()
+                        break
+                return alpha
+            if not maximizingPlayer:
+                for a in game.get_legal_moves():
+                    f = open("logfile.txt", "a")
+                    f.write("\nMin function node" + str(depth) + " : ")
+                    json.dump(a, f)
+                    f.close()
+                    beta = min (beta, alphabetaScore (game.forecast_move(a), depth - 1, True, alpha, beta))
+                    f = open("logfile.txt", "a")
+                    f.write("\nMin function beta " + str(depth) + " : ")
+                    f.write(str(beta))
+                    f.close()
+                    if alpha >= beta:
+                        f = open("logfile.txt", "a")
+                        f.write("\nMin function node pruned " + str(depth) + " : ")
+                        f.close()
+                        break
+                return beta
         
-        def max_value (game, depth, alpha, beta):
+        
+#        def max_value (game, depth, alpha, beta):
 #            if self.time_left() < self.TIMER_THRESHOLD:
 #                return -1
-            if depth == 0 or self.time_left() < self.TIMER_THRESHOLD:
-                return self.score(game, self);  
-            l = game.get_legal_moves()
-            for a in game.get_legal_moves():
-                alpha = max (alpha, min_value (game.forecast_move(a), depth - 1, alpha, beta))
-                if beta <= alpha:
-                    break
-            return alpha
+#            if depth == 0:
+#                return self.score(game, self);  
+#            for a in game.get_legal_moves():
+#                alpha = max (alpha, min_value (game.forecast_move(a), depth - 1, alpha, beta))
+#                if beta <= alpha:
+#                    break
+#            return alpha
                 
-        def min_value (game, depth, alpha, beta):
+#        def min_value (game, depth, alpha, beta):
 #            if self.time_left() < self.TIMER_THRESHOLD:
 #                return -1
-            if depth == 0 or self.time_left() < self.TIMER_THRESHOLD: 
-                return self.score(game, self)
-            for a in game.get_legal_moves():
-                beta = min (beta, max_value (game.forecast_move(a), depth - 1, alpha, beta))
-                if beta <= alpha:
-                    break
-            return beta
-#        v = float ("-inf")
-#        for b in legalMoves:
-#            score = alphabetaScore (game.forecast_move(b), depth-1, True, alpha, beta)
-#            v=max(v, score)
-#        return v
-            
-#        move, score =  alphabetaScore (game, depth, True, alpha, beta)
-        
-        return max_value (game, depth, float ("-inf"), float ("inf"))
+#            if depth == 0: 
+#                return self.score(game, self)
+#            for a in game.get_legal_moves():
+#                beta = min (beta, max_value (game.forecast_move(a), depth - 1, alpha, beta))
+#                if beta <= alpha:
+#                    break
+#            return beta
+#        
+        return max (legalMoves, key = lambda a: alphabetaScore (game.forecast_move(a), depth-1, True, alpha, beta))
               
